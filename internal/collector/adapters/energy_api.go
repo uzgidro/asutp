@@ -75,6 +75,22 @@ func (a *EnergyAPIAdapter) Collect(ctx context.Context, device *config.DeviceCon
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
+	// Some endpoints return plain "True"/"False" instead of JSON
+	// when there's no data or everything is OK
+	bodyStr := string(bytes.TrimSpace(body))
+	if bodyStr == "True" || bodyStr == "False" || bodyStr == "true" || bodyStr == "false" {
+		a.log.Debug("endpoint returned boolean, no data to collect",
+			slog.String("endpoint", device.Endpoint),
+			slog.String("response", bodyStr),
+		)
+		return &collector.CollectedData{
+			DeviceID:    device.ID,
+			DeviceName:  device.Name,
+			DeviceGroup: device.Group,
+			DataPoints:  []model.DataPoint{},
+		}, nil
+	}
+
 	var rawData map[string]any
 	if err := json.Unmarshal(body, &rawData); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response: %w", err)

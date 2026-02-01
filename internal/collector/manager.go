@@ -112,6 +112,14 @@ func (m *Manager) collectAndSend(ctx context.Context) {
 	}()
 
 	for data := range results {
+		// Skip empty data (e.g., when endpoint returns "True"/"False")
+		if len(data.DataPoints) == 0 {
+			m.log.Debug("skipping empty data",
+				slog.String("device_id", data.DeviceID),
+			)
+			continue
+		}
+
 		envelope := model.NewEnvelope(
 			m.stationCfg.StationID,
 			m.stationCfg.StationName,
