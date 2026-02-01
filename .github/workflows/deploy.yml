@@ -42,10 +42,10 @@ jobs:
       - name: Update Kustomization (dev)
         run: |
           # Update dev overlay with new image tag
-          sed -i "s|newTag:.*|newTag: ${{ steps.slug.outputs.sha8 }}|g" asutp/overlays/dev/kustomization.yaml
+          sed -i "s|newTag:.*|newTag: ${{ steps.slug.outputs.sha8 }}|g" apps/asutp/overlays/dev/kustomization.yaml
 
           # Verify change
-          cat asutp/overlays/dev/kustomization.yaml
+          cat apps/asutp/overlays/dev/kustomization.yaml
 
       - name: Commit and Push
         run: |
@@ -53,7 +53,7 @@ jobs:
           git config user.name "CI Bot"
 
           if [[ -n $(git status --porcelain) ]]; then
-            git add asutp/overlays/dev/kustomization.yaml
+            git add apps/asutp/overlays/dev/kustomization.yaml
             git commit -m "ci: update asutp-collector dev image to ${{ steps.slug.outputs.sha8 }}"
             git push
             echo "✅ Manifest updated"
