@@ -1,0 +1,51 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# GitHub
+.github/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Documentation
+README.md
+docs/
+*.md
+
+# GitOps manifests (not needed in container)
+asutp/
+
+# Test files
+*_test.go
+testdata/
+coverage.out
+coverage.html
+
+# Local configs and secrets
+config/config.local.yaml
+config/secret-plain.yaml
+.env
+*.local.yaml
+
+# Database files (runtime only)
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Build artifacts
+asutp-collector
+*.exe
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dockerfile itself
+Dockerfile
+.dockerignore

@@ -1,0 +1,27 @@
+env: prod
+
+station:
+  id: "ges1"
+  name: "ГЭС-1"
+  config_path: "/app/config/ges1.yaml"
+
+sender:
+  url: "https://prime.speedwagon.uz/api/v1/asutp/telemetry"
+  token: "${SENDER_TOKEN}"
+  timeout: 30s
+  retry:
+    max_attempts: 5
+    initial_delay: 1s
+    max_delay: 60s
+
+buffer:
+  enabled: true
+  path: "/var/lib/asutp/buffer.db"
+  max_age: 24h
+
+health:
+  address: ":8080"
+
+log:
+  level: info
+  format: json

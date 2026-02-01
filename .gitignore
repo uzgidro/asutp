@@ -1,0 +1,43 @@
+# Binaries
+asutp-collector
+*.exe
+
+# Database
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+*.local.yaml
+!config/config.local.yaml
+
+# Secrets (plain, before sealing)
+config/secret-plain.yaml
+secret-plain.yaml
+
+# Test coverage
+coverage.out
+coverage.html
+
+# Vendor (if not committed)
+# vendor/
+
+# Build cache
+dist/
+tmp/
+asutp/
+.claude/
+*.txt
+*.docx
