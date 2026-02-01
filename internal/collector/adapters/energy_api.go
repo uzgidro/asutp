@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/speedwagon-io/asutp/internal/collector"
@@ -91,8 +92,14 @@ func (a *EnergyAPIAdapter) Collect(ctx context.Context, device *config.DeviceCon
 		}, nil
 	}
 
+	// Fix Python-style booleans (True/False -> true/false)
+	bodyStr = strings.ReplaceAll(bodyStr, ":True,", ":true,")
+	bodyStr = strings.ReplaceAll(bodyStr, ":True}", ":true}")
+	bodyStr = strings.ReplaceAll(bodyStr, ":False,", ":false,")
+	bodyStr = strings.ReplaceAll(bodyStr, ":False}", ":false}")
+
 	var rawData map[string]any
-	if err := json.Unmarshal(body, &rawData); err != nil {
+	if err := json.Unmarshal([]byte(bodyStr), &rawData); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
 	}
 
