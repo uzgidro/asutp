@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: 'Image tag to promote (e.g., abc1234)'
+        description: 'Image tag to promote (full SHA from dev)'
         required: true
       confirm:
         description: 'Type "yes" to confirm production deployment'
