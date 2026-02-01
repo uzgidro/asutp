@@ -38,35 +38,43 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/asutp-collector:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/asutp-collector:${{ steps.slug.outputs.sha8 }}
+    
 
-      - name: Update Kustomization (dev)
-        run: |
-          # Update dev overlay with new image tag
-          sed -i "s|newTag:.*|newTag: ${{ steps.slug.outputs.sha8 }}|g" apps/asutp/overlays/dev/kustomization.yaml
+  deploy-dev:
+    needs: build-and-push
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
 
-          # Verify change
-          cat apps/asutp/overlays/dev/kustomization.yaml
+    steps:
+        - name: Setup SSH agent
+          uses: webfactory/ssh-agent@v0.9.0
+          with:
+            ssh-private-key: ${{ secrets.GITOPS_SSH_KEY }}
 
-      - name: Commit and Push
-        run: |
-          git config user.email "ci-bot@example.com"
-          git config user.name "CI Bot"
-
-          if [[ -n $(git status --porcelain) ]]; then
-            git add apps/asutp/overlays/dev/kustomization.yaml
-            git commit -m "ci: update asutp-collector dev image to ${{ steps.slug.outputs.sha8 }}"
-            git push
-            echo "✅ Manifest updated"
-          else
-            echo "⚠️ No changes in manifest"
-          fi
-
-      - name: Summary
-        run: |
-          echo "## Deploy Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Image | \`${{ secrets.DOCKERHUB_USERNAME }}/asutp-collector:${{ steps.slug.outputs.sha8 }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Environment | \`dev\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Commit | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+        - name: Update dev manifest
+          run: |
+            # Настройка git
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            
+            # Добавляем GitHub в known_hosts
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+            
+            # Клонируем gitops репо
+            git clone git@github.com:${{ github.repository_owner }}/GitOps-Repo.git gitops
+            
+            # Переходим в склонированную папку
+            cd gitops
+            
+            # Обновляем image tag через sed
+            sed -i "s|newTag:.*|newTag: ${{ github.sha }}|g" apps/asutp/overlays/dev/kustomization.yaml
+            
+            # Коммит и пуш если есть изменения
+            if [[ -n $(git status --porcelain) ]]; then
+              git add apps/asutp/overlays/dev/kustomization.yaml
+              git commit -m "deploy(dev): ${{ github.sha }}"
+              git push
+            else
+              echo "No changes to commit"
+            fi
