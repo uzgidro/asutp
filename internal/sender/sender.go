@@ -22,11 +22,12 @@ type Sender interface {
 }
 
 type HTTPSender struct {
-	log    *slog.Logger
-	url    string
-	token  string
-	client *http.Client
-	retry  *RetryConfig
+	log         *slog.Logger
+	baseURL     string
+	stationDBID int
+	token       string
+	client      *http.Client
+	retry       *RetryConfig
 }
 
 type RetryConfig struct {
@@ -35,11 +36,12 @@ type RetryConfig struct {
 	MaxDelay     time.Duration
 }
 
-func NewHTTPSender(log *slog.Logger, cfg *config.SenderConfig) *HTTPSender {
+func NewHTTPSender(log *slog.Logger, cfg *config.SenderConfig, stationDBID int) *HTTPSender {
 	return &HTTPSender{
-		log:   log,
-		url:   cfg.URL,
-		token: cfg.Token,
+		log:         log,
+		baseURL:     cfg.URL,
+		stationDBID: stationDBID,
+		token:       cfg.Token,
 		client: &http.Client{
 			Timeout: cfg.Timeout,
 		},
@@ -101,7 +103,8 @@ func (s *HTTPSender) sendWithRetry(ctx context.Context, data []byte) error {
 }
 
 func (s *HTTPSender) doSend(ctx context.Context, data []byte) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.url, bytes.NewReader(data))
+	url := fmt.Sprintf("%s/%d", s.baseURL, s.stationDBID)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(data))
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
@@ -132,7 +135,8 @@ func (s *HTTPSender) nextDelay(current time.Duration) time.Duration {
 }
 
 func (s *HTTPSender) Health(ctx context.Context) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, s.url, nil)
+	url := fmt.Sprintf("%s/%d", s.baseURL, s.stationDBID)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create health request: %w", err)
 	}

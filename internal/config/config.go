@@ -19,6 +19,7 @@ type Config struct {
 type StationRef struct {
 	ID         string `yaml:"id" env-required:"true"`
 	Name       string `yaml:"name" env-required:"true"`
+	DBID       int    `yaml:"db_id" env-required:"true"`
 	ConfigPath string `yaml:"config_path" env-required:"true"`
 }
 

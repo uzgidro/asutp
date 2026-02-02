@@ -59,7 +59,7 @@ func main() {
 		dataSender = sender.NewLogSender(log)
 		log.Info("dry-run mode: data will be logged instead of sent")
 	} else {
-		dataSender = sender.NewHTTPSender(log, &cfg.Sender)
+		dataSender = sender.NewHTTPSender(log, &cfg.Sender, cfg.Station.DBID)
 	}
 
 	var buf buffer.Buffer
